@@ -52,39 +52,43 @@ Functions.GetMouse = function()
 end
 
 Functions.VisibleCheck = function(Settings)
-    if Settings.RayCheck == false then
-        local ScreenVector, OnScreen = Camera.WorldToViewportPoint(Camera, Settings.End)
+    local Visible = "None"
 
-        if Settings.CustomCheck then
-            OnScreen = Settings.CustomCheck(Settings.End)
+    if Settings.RayCheck then
+        local PartAncestor = Settings.Part.Parent
+        local Start, End = Settings.Start, Settings.End
+
+        local Distance  = (Start - End).Magnitude
+        local Unit      = (End - Start).Unit
+
+        local HitPart, HitPosition = Workspace.FindPartOnRayWithIgnoreList(
+            Workspace, 
+            Ray.new(Start, Unit * Distance),
+            Settings.IgnoreList
+        )
+        local ScreenVector
+
+        local IsAncestorOfRayPart = PartAncestor:IsAncestorOf(HitPart)
+        Visible                   = IsAncestorOfRayPart or ( (HitPart == nil) or (HitPart.Transparency ~= 0) )
+
+        if Visible then
+            ScreenVector, OnScreen = Camera.WorldToViewportPoint(Camera, HitPosition or End)
+
+            if Settings.OnScreen and (not OnScreen) then
+                Visible = false
+            end
         end
-
-        return OnScreen, ScreenVector
+    elseif Setttings.CustomCheck then
+        Visible = Settings.CustomCheck(Settings.End)
+        warn("CustomCheck result:", Visible)
+    elseif Settings.OnScreen then
+        ScreenVector, Visible = Camera.WorldToViewportPoint(Camera, Settings.End)
     end
 
-    local PartAncestor = Settings.Part.Parent
-    local Start, End = Settings.Start, Settings.End
-
-    local Distance  = (Start - End).Magnitude
-    local Unit      = (End - Start).Unit
-
-    local HitPart, HitPosition = Workspace.FindPartOnRayWithIgnoreList(
-        Workspace, 
-        Ray.new(Start, Unit * Distance),
-        Settings.IgnoreList
-    )
-    local ScreenVector
-
-    local IsAncestorOfRayPart = PartAncestor:IsAncestorOf(HitPart)
-    local Visible             = IsAncestorOfRayPart or ( (HitPart == nil) or (HitPart.Transparency ~= 0) )
-
-    if Visible then
-        ScreenVector, OnScreen = Camera.WorldToViewportPoint(Camera, HitPosition or End)
-
-        if Settings.OnScreen and (not OnScreen) then
-            Visible = false
-        end
-    end
+    local c = 0
+    repeat task.wait()
+        c = c + 1
+    until (Visible ~= "None") or c >= 40
 
     return Visible, ScreenVector
 end
@@ -106,9 +110,11 @@ Functions.GetClosestPlayerToMouse = function(Players, Validate, MaxDistance, Set
                 IgnoreList  = Settings.IgnoreList or {};
             })
 
-            if PartVisible and ScreenVector then
-               
+            if PartVisible then
+                ScreenVector = ScreenVector or Camera.WorldToViewportPoint(Camera, CharacterPart.Position)
+
                 local Distance = ( (Settings.Mouse or Functions.GetMouse)() - Vector2.new(ScreenVector.X, ScreenVector.Y) ).Magnitude
+
                 if (Distance < MaxDistance) then
                     MaxDistance = Distance
 
