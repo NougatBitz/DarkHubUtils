@@ -54,6 +54,11 @@ end
 Functions.VisibleCheck = function(Settings)
     if Settings.RayCheck == false then
         local ScreenVector, OnScreen = Camera.WorldToViewportPoint(Camera, Settings.End)
+
+        if Settings.CustomCheck then
+            OnScreen = Settings.CustomCheck(Settings.End)
+        end
+
         return OnScreen, ScreenVector
     end
 
@@ -97,8 +102,10 @@ Functions.GetClosestPlayerToMouse = function(Players, Validate, MaxDistance, Set
                 Part        = CharacterPart;
                 OnScreen    = Settings.OnScreen or true;
                 RayCheck    = Settings.RayCheck or true;
-                IgnoreList  = Settings.IgnoreList or {}
+                CustomCheck = Settings.CustomCheck or nil;
+                IgnoreList  = Settings.IgnoreList or {};
             })
+
             if PartVisible and ScreenVector then
                
                 local Distance = ( (Settings.Mouse or Functions.GetMouse)() - Vector2.new(ScreenVector.X, ScreenVector.Y) ).Magnitude
