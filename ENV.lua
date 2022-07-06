@@ -52,9 +52,10 @@ Functions.GetMouse = function()
 end
 
 Functions.VisibleCheck = function(Settings)
-    local Visible = "None"
+    local Visible = nil
 
     if Settings.RayCheck then
+        warn("raycheck method choseh")
         local PartAncestor = Settings.Part.Parent
         local Start, End = Settings.Start, Settings.End
 
@@ -82,13 +83,14 @@ Functions.VisibleCheck = function(Settings)
         Visible = Settings.CustomCheck(Settings.End)
         warn("CustomCheck result:", Visible)
     elseif Settings.OnScreen then
+        warn("on screen method chosen")
         ScreenVector, Visible = Camera.WorldToViewportPoint(Camera, Settings.End)
     end
 
     local c = 0
     repeat task.wait()
         c = c + 1
-    until (Visible ~= "None") or c >= 40
+    until (Visible ~= nil) or c >= 40
 
     return Visible, ScreenVector
 end
