@@ -79,8 +79,10 @@ Functions.VisibleCheck = function(Settings)
                 Visible = false
             end
         end
-    elseif Setttings.CustomCheck then
-        Visible = Settings.CustomCheck(Settings.End)
+    elseif Settings.CustomCheck then
+        task.spawn(function()
+            Visible = Settings.CustomCheck(Settings.End)
+        end)
         warn("CustomCheck result:", Visible)
     elseif Settings.OnScreen then
         warn("on screen method chosen")
@@ -96,6 +98,7 @@ Functions.VisibleCheck = function(Settings)
 end
 
 Functions.GetClosestPlayerToMouse = function(Players, Validate, MaxDistance, Settings)
+    warn(Settings.RayCheck, Settings.OnScreen, Settings.CustomCheck)
     local MaxDistance = MaxDistance or math.huge
     local Closest, ClosestPart = nil, nil
 
