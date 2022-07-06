@@ -96,12 +96,11 @@ Functions.VisibleCheck = function(Settings)
 
     return Visible, ScreenVector
 end
-
+--[[
 Functions.GetClosestPlayerToMouse = function(Players, Validate, MaxDistance, Settings)
-    warn(Settings.RayCheck, Settings.OnScreen, Settings.CustomCheck)
     local MaxDistance = MaxDistance or math.huge
     local Closest, ClosestPart = nil, nil
-
+    
     for index, value in next, Players do
         local CharacterPart = Validate(index, value)
         if CharacterPart then
@@ -128,6 +127,47 @@ Functions.GetClosestPlayerToMouse = function(Players, Validate, MaxDistance, Set
                 end
 
             end
+        end
+    end
+
+    return Closest, ClosestPart
+end]]
+Functions.GetClosestPlayerToMouse = function(Players, Validate, MaxDistance, Settings)
+    local MaxDistance = MaxDistance or math.huge
+    local Closest, ClosestPart = nil, nil
+
+    local Distances = {}
+
+    for index, value in next, Players do
+        spawn(function()
+            local CharacterPart = Validate(index, value)
+            if CharacterPart then
+                local PartVisible, ScreenVector = Functions.VisibleCheck({
+                    Start       = Settings.Start,
+                    End         = CharacterPart.Position;
+                    Part        = CharacterPart;
+                    OnScreen    = Settings.OnScreen;
+                    RayCheck    = Settings.RayCheck;
+                    CustomCheck = Settings.CustomCheck or nil;
+                    IgnoreList  = Settings.IgnoreList  or {};
+                })
+
+                if PartVisible then
+                    ScreenVector = ScreenVector or Camera.WorldToViewportPoint(Camera, CharacterPart.Position)
+
+                    local Distance = ( (Settings.Mouse or Functions.GetMouse)() - Vector2.new(ScreenVector.X, ScreenVector.Y) ).Magnitude
+                    Distances[{part = CharacterPart, plr = value}] = Distance
+                end
+            end
+        end)
+    end
+
+    for player, distance in next, Distances do
+        if (distance < MaxDistance) then
+            MaxDistance = Distance
+
+            Closest     = player.plr
+            ClosestPart = player.part
         end
     end
 
