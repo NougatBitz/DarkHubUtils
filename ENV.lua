@@ -139,6 +139,16 @@ Functions.GetTableFromGC = function(x)
         if type(v) == "table" then
             for i2, v2 in next, v do
                 if v2 == x or i2 == x then
+                    local old_script
+                    for i3, v3 in next, v do
+                        if type(v3) == "function" then
+                            local cur_script = getfenv(v3).script
+                            if not old_script then old_script = cur_script end
+                            if old_script ~= cur_script then
+                                continue
+                            end
+                        end
+                    end
                     Result = v
                     break
                 end
