@@ -109,8 +109,8 @@ Functions.GetClosestPlayerToMouse = function(Players, Validate, MaxDistance, Set
                 Start       = Settings.Start,
                 End         = CharacterPart.Position;
                 Part        = CharacterPart;
-                OnScreen    = Settings.OnScreen or true;
-                RayCheck    = Settings.RayCheck or true;
+                OnScreen    = Settings.OnScreen;
+                RayCheck    = Settings.RayCheck;
                 CustomCheck = Settings.CustomCheck or nil;
                 IgnoreList  = Settings.IgnoreList or {};
             })
