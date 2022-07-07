@@ -136,12 +136,14 @@ Functions.GetClosestPlayerToMouse = function(Players, Validate, MaxDistance, Set
     local MaxDistance = MaxDistance or math.huge
     local Closest, ClosestPart = nil, nil
 
-    local Distances = {}
+    local Distances, counter = {}
 
     for index, value in next, Players do
-        spawn(function()
-            local CharacterPart = Validate(index, value)
-            if CharacterPart then
+        local CharacterPart = Validate(index, value)
+        
+        if CharacterPart then
+            counter = counter + 1
+            spawn(function()
                 local PartVisible, ScreenVector = Functions.VisibleCheck({
                     Start       = Settings.Start,
                     End         = CharacterPart.Position;
@@ -158,10 +160,10 @@ Functions.GetClosestPlayerToMouse = function(Players, Validate, MaxDistance, Set
                     local Distance = ( (Settings.Mouse or Functions.GetMouse)() - Vector2.new(ScreenVector.X, ScreenVector.Y) ).Magnitude
                     Distances[{part = CharacterPart, plr = value}] = Distance
                 end
-            end
-        end)
+            end)
+        end
     end
-
+    task.wait(0.05)
     for player, distance in next, Distances do
         if (distance < MaxDistance) then
             MaxDistance = Distance
